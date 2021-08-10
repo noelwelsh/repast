@@ -1,5 +1,21 @@
 \section{Introduction}
 
+   Many languages allow string interpolation: a string literal can contain placeholders that indicate where the value of an expression should be substituted into the string. For example, in Scala we can write
+
+  \begin{lstlisting}
+    val name = "Noel"
+
+    val hi = s"Hello $name!"
+  \end{lstlisting}
+
+  and \lstinline{hi} will have the value \lstinline{"Hello Noel!"}.
+
+  Fewer languages allow extensible string interpolation. Scala is one of them. In Scala the character in front of the interpolated string, \texttt{s} in the example above, determines how the string is processed. The details, which are not important here, are given in the [documentation for the `StringContext` API][StringContext]. Additionally, the result of a string interpolation does not necessarily have to be a string. Interpolation can evaluate to any type. This means that string interpolation can be used to embed domain specific languages (DSLs) within Scala, with interpolation functioning as the interface between the DSL and the Scala host language. Lisp programmers will recognize string interpolation as a form of quasi-quote and unquote.
+
+  This is fine in theory, but there is a problem: how do we parse our embedded DSL when the parsing may be interrupted at any time with an interpolated value? This would be straightforward if only strings could be supplied as interpolated values. In this setting we could simply render everything to a string and then parse the result. However a major advantage of creating an embedded DSL is that we can pass structured data from the host language into the embedded language, and therefore working only with strings is not sufficient.
+
+  In this paper we present \emph{resumable parser combinators}, an extension of parser combinators that allows parsing to be interrupted, parsed values to be injected, and parsing resumed with additional input. We describe the design and implementation of the library. etc.
+
 Four main components:
 
 \begin{enumerate}
@@ -8,7 +24,3 @@ Four main components:
   \item implementation technique; and
   \item general principles through which we can view the design and implementation.
 \end{enumerate}
-
-
-
-\section{Resumable Parsers}
