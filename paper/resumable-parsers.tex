@@ -1,0 +1,59 @@
+\documentclass[sigplan,screen,review]{acmart}
+\usepackage{listings}
+\begin{document}
+  \lstset{language=Scala, basicstyle=\small}
+  \title{Resumable Parser Combinators}
+  \author{Noel Welsh}
+
+  \maketitle
+
+  \section{Introduction}
+  Like many languages, Scala allows string interpolation: a string literal can contain placeholders that indicate where the value of an expression should be substituted into the string. For example, we can write
+
+  \begin{lstlisting}
+    val name = "Noel"
+
+    val hi = s"Hello $name!"
+  \end{lstlisting}
+
+  and \texttt{hi} will have the value \texttt{"Hello Noel!"}.
+
+  Scala's string interpolation is extensible. The character in front of the interpolated string, \texttt{s} in the example above, determines how the string is processed. The details, which are not important here, are given in the [documentation for the `StringContext` API][StringContext].
+
+  The result of a string interpolation does not necessarily have to be a \texttt{String}. In fact interpolation can evaluate to any type. This means that string interpolation can be used to embed domain specific languages (DSLs) within Scala, with interpolation functioning as the interface between the DSL and the Scala host. Lisp programmers will recognize string interpolation as a form of quasi-quote.
+
+  This is fine in theory, but there is a problem: how do we parse our embedded DSL when the parsing may be interrupted at any time with an interpolated value? This would be straightforward if only strings could be supplied as interpolated values. In this setting we could simply render everything to a string and then parse the result. However a major advantage of creating a DSL is that we can pass structured data from the host language into the embedded language, and therefore working only with strings is not sufficient.
+
+  This is the problem I faced when created a [Markdown string interpolator][mads]. My goal is to render markdown to web pages, and values I interpolate will be interactive components. To achieve this I created a parser combinator library that allows parsing to be suspended and then resumed with values injected from outside. In this post I describe the design of the library.
+
+
+  \section{Design Constraints}
+
+  \section{Design}
+
+  The overall design is summarized by Listing~\ref{lst:parser}.
+
+
+  \begin{lstlisting}[frame=lines, caption={The \texttt{Parser} type}, float=*, label=lst:parser]
+trait Parser[A]:
+  def parse(input: String): Parser.Result[A]
+
+  def resume(using
+    semigroup: Semigroup[A],
+    ev: String =:= A
+  ): Suspendable[A, A]
+
+  def resumeWith(f: String => A)(using
+      semigroup: Semigroup[A]
+  ): Suspendable[A, A]
+
+  def commit[S]: Suspendable[S, A]
+
+object Parser:
+  enum Result[A]:
+    case Epsilon(input: String, start: Int)
+    case Committed(input: String, start: Int, offset: Int)
+    case Continue(result: A, input: String, start: Int)
+    case Success(result: A, input: String, start: Int, offset: Int)
+  \end{lstlisting}
+\end{document}
