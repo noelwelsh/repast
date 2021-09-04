@@ -1,30 +1,59 @@
-\documentclass[sigplan,screen,review]{acmart}
+% -*- coding: utf-8; -*-
+\documentclass[english,submission]{programming}
 \usepackage{listings}
+\usepackage[backend=biber]{biblatex}
+\addbibresource{example.bib}
 \begin{document}
   \lstset{language=Scala, basicstyle=\small}
   \title{Resumable Parser Combinators}
   \author{Noel Welsh}
+  \authorinfo{is the author of this paper. Contact him at
+    \email{noel@noelwelsh.com}.}
+  \affiliation[a]{Inner Product LLC}
+  \keywords{programming journal, paper formatting, submission preparation} % please provide 1--5 keywords
+  \paperdetails{
+    %% perspective options are: art, sciencetheoretical, scienceempirical, engineering.
+    %% Choose exactly the one that best describes this work. (see 2.1)
+    perspective=art,
+    %% State one or more areas, separated by a comma. (see 2.2)
+    %% Please see list of areas in http://programming-journal.org/cfp/
+    %% The list is open-ended, so use other areas if yours is/are not listed.
+    area={Parsing},
+    %% You may choose the license for your paper (see 3.)
+    %% License options include: cc-by (default), cc-by-nc
+    license=cc-by,
+  }
+  % \begin{CCSXML}
+  % <ccs2012>
+  % <concept>
+  % <concept_id>10002944.10011122.10003459</concept_id>
+  % <concept_desc>General and reference~Computing standards, RFCs and guidelines</concept_desc>
+  % <concept_significance>300</concept_significance>
+  % </concept>
+  % <concept>
+  % <concept_id>10010405.10010476.10010477</concept_id>
+  % <concept_desc>Applied computing~Publishing</concept_desc>
+  % <concept_significance>300</concept_significance>
+  % </concept>
+  % </ccs2012>
+  % \end{CCSXML}
+
+  % \ccsdesc[300]{General and reference~Computing standards, RFCs and guidelines}
+  % \ccsdesc[500]{Applied computing~Publishing}
 
   \maketitle
 
-  \section{Introduction}
-  Like many languages, Scala allows string interpolation: a string literal can contain placeholders that indicate where the value of an expression should be substituted into the string. For example, we can write
+  % Please always include the abstract.
+  % The abstract MUST be written according to the directives stated in
+  % http://programming-journal.org/submission/
+  % Failure to adhere to the abstract directives may result in the paper
+  % being returned to the authors.
+  \begin{abstract}
+  \end{abstract}
 
-  \begin{lstlisting}
-    val name = "Noel"
 
-    val hi = s"Hello $name!"
-  \end{lstlisting}
-
-  and \texttt{hi} will have the value \texttt{"Hello Noel!"}.
-
-  Scala's string interpolation is extensible. The character in front of the interpolated string, \texttt{s} in the example above, determines how the string is processed. The details, which are not important here, are given in the [documentation for the `StringContext` API][StringContext].
-
-  The result of a string interpolation does not necessarily have to be a \texttt{String}. In fact interpolation can evaluate to any type. This means that string interpolation can be used to embed domain specific languages (DSLs) within Scala, with interpolation functioning as the interface between the DSL and the Scala host. Lisp programmers will recognize string interpolation as a form of quasi-quote.
-
-  This is fine in theory, but there is a problem: how do we parse our embedded DSL when the parsing may be interrupted at any time with an interpolated value? This would be straightforward if only strings could be supplied as interpolated values. In this setting we could simply render everything to a string and then parse the result. However a major advantage of creating a DSL is that we can pass structured data from the host language into the embedded language, and therefore working only with strings is not sufficient.
-
-  This is the problem I faced when created a [Markdown string interpolator][mads]. My goal is to render markdown to web pages, and values I interpolate will be interactive components. To achieve this I created a parser combinator library that allows parsing to be suspended and then resumed with values injected from outside. In this post I describe the design of the library.
+  \input{introduction.tex}
+  \input{parser-combinators.tex}
 
 
   \section{Design Constraints}
@@ -56,4 +85,5 @@ object Parser:
     case Continue(result: A, input: String, start: Int)
     case Success(result: A, input: String, start: Int, offset: Int)
   \end{lstlisting}
+  \printbibliography
 \end{document}

@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-latexmk -xelatex -pvc "$@"
+latexmk -lualatex -pvc resumable-parsers.tex
