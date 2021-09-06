@@ -7,4 +7,10 @@ We start with a description of a basic parser combinator library, and then descr
 
 \subsection{Parser}
 
-The \lstinline{Parser} type implements a basic parser combinator library.
+The \lstinline{Parser} type implements a basic parser combinator library. A simple example is given in \ref{lst:digits} to give the flavour of the API.
+
+\begin{lstlisting}[frame=lines,float,caption={A simple parser to recognise a floating point number}]
+val digits = Parser.charsWhile(_.isDigit)
+
+val float = digits ~ Parser.char('.') ~ digits
+\end{lstlisting}
