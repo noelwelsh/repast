@@ -1,0 +1,11 @@
+.DS_Store
+.idea
+*.log
+tmp/
+
+target/
+.bloop
+.bsp
+.metals
+project/project
+metals.sbt
