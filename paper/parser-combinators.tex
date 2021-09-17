@@ -1,15 +1,35 @@
 \section{Parser Combinators}
 
-Parser combinators are a well established technique for creating a parser in a composable in a composable . Their ease of use and simplicity of implementation make them ideal for ...
+...intro sign posts here...
 
-We start with a description of a basic parser combinator library, and then describe how we extend the basic library to support resumable parsing.
+In the abstract we might think of a parser as a function from some input---let's say a \lstinline{String} for simplicity---to some structured value of a domain specific type \lstinline{A}. In a typical case \lstinline{A} will be the type of an abstract syntax tree (AST). A bit of thought will quickly bring us to refine the result type. A parser can fail and usually we are also interested in the remaining unparsed input. So we might say a parser is a function from \lstinline{String} to \lstinline{Result[A]} where \lstinline{Result} is a type that can represent success or failure, and in the case of success can also hold unparsed input in addition to the AST. Listing~\ref{lst:basic-parser} shows a Scala encoding of this representation.
+
+\begin{lstlisting}[frame=lines, caption={A basic \lstinline{Parser} type}, float=*, label=lst:basic-parser]
+  type Parser[A] = String => Result[A]
+
+  enum Result[A]:
+    case Success(result: A, remaining: String)
+    case Failure(reason: String)
+\end{lstlisting}
+
+From this basic representation it's natural (at least if you're a functional programmer) to think about composition of parsers. Parsers compose in many ways. For example, sequential composition occurs when one parser consumes the remaining input of another and alternation allows us to try a number of parsers in order until one succeeds. This is the key insight behind \emph{parser combinators} \textbf{CITE CITE CITE}, a well established technique for constructing parsers from simple atomic operations, such as matching a string, and composition operators, such as the above mentioned sequencing and alternation. Parser combinators are simple to implement and use, and many languages have one or more well supported parser combinator libraries.
+
+Cats-parse API examples.
+
+Explicit control over backtracking.
+
+Cats-parse backtracking example.
 
 
-\subsection{Parser}
+\subsection{Parsers in Repast}
+
+A standard parser combinator library is at the core of \emph{Repast}. It mostly follows the \emph{Cats Parse} API, so the above examples give a good feel for its use. In particular, it follows \emph{Cats Parse} with a four-state result type and explicit control over backtracking. This type is called \lstinline{Parser}.
+
+\lstinline{Parser} differs from the exposition above in one crucial way: parsers are represented as data structures not functions. This allows us to provide different interpretations for the parsing depending on how we handle interruptions. This change of representation is governed by a simple transformation that we discuss in Section\~\textbf{TODO}. Here we describe the API for controlling
 
 The \lstinline{Parser} type implements a basic parser combinator library. A simple example is given in \ref{lst:digits} to give the flavour of the API.
 
-\begin{lstlisting}[frame=lines,float,caption={A simple parser to recognise a floating point number}]
+\begin{lstlisting}[frame=lines,float,caption={A simple parser to recognise a subset of floating point numbers}]
 val digits = Parser.charsWhile(_.isDigit)
 
 val float = digits ~ Parser.char('.') ~ digits
