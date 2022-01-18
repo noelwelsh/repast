@@ -3,6 +3,7 @@ package repast
 import cats.Semigroup
 import cats.data.Chain
 import cats.syntax.semigroup
+
 import scala.util.matching.Regex
 
 /** A parser that produces a value of type A.

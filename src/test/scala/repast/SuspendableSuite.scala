@@ -48,7 +48,10 @@ class SuspendableSuite extends FunSuite {
       .charsUntilTerminatorOrEnd("<")
       .resume
     val result =
-      parser.parse("    ").injectAndCompleteOrRestart("inject", "", parser).unsafeGet
+      parser
+        .parse("    ")
+        .injectAndCompleteOrRestart("inject", "", parser)
+        .unsafeGet
 
     assertEquals(result, "inject")
   }
@@ -154,5 +157,41 @@ class SuspendableSuite extends FunSuite {
     val result = parser.parseToCompletion(input)
 
     assertEquals(result, Suspendable.Result.Success(expected, "4444a", 0, 4))
+  }
+
+  test(
+    "Suspendable.min successfully parses at least minimum number of elements"
+  ) {
+    val parser = Parser.char('a').commit.min(2)
+    val input = "aa "
+
+    assertEquals(
+      parser.parse(input),
+      Resumable.success(NonEmptyChain('a', 'a'), input, 0, 2)
+    )
+  }
+
+  test(
+    "Suspendable.min fails if it cannot parse at least minimum number of elements"
+  ) {
+    val parser = Parser.char('a').commit.min(2)
+    val input = "a "
+
+    assertEquals(
+      parser.parse(input),
+      Resumable.committed(input, 0, 1)
+    )
+  }
+
+  test(
+    "Suspendable.max successfully parses no more than max number of elements"
+  ) {
+    val parser = Parser.char('a').commit.max(2)
+    val input = "aaaa "
+
+    assertEquals(
+      parser.parse(input),
+      Resumable.success(NonEmptyChain('a', 'a'), input, 0, 2)
+    )
   }
 }
