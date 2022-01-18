@@ -1,5 +1,7 @@
 package repast
 
+import cats.data.NonEmptyChain
+import cats.implicits.*
 import munit.FunSuite
 
 class ParserSuite extends FunSuite {
@@ -242,5 +244,78 @@ class ParserSuite extends FunSuite {
       Result.Success(input, input, 0, input.size)
     )
     assertEquals(end.parse(input), Result.Epsilon(input, 0))
+  }
+
+  test("Parser.rep repeats until parser does not succeed") {
+    val parser = Parser.char('a').commit.rep
+    val input = "aaaa "
+
+    assertEquals(
+      parser.parse(input),
+      Resumable.success(NonEmptyChain('a', 'a', 'a', 'a'), input, 0, 4)
+    )
+  }
+
+  test("Parser.rep accumulates results in correct order") {
+    val parser = Parser.charWhere(_.isDigit).commit.rep
+    val input = "1234 "
+
+    assertEquals(
+      parser.parse(input),
+      Resumable.success(NonEmptyChain('1', '2', '3', '4'), input, 0, 4)
+    )
+  }
+
+  test("Parser.rep fails if parser doesn't parse at least once") {
+    val parser = Parser.charWhere(_.isDigit).commit.rep
+    val input = " "
+
+    assertEquals(parser.parse(input), Resumable.epsilon(input, 0))
+  }
+
+  test("Parser.rep succeeds if parser parses at least once") {
+    val parser = Parser.charWhere(_.isDigit).commit.rep
+    val input = "1 "
+
+    assertEquals(
+      parser.parse(input),
+      Resumable.success(NonEmptyChain('1'), input, 0, 1)
+    )
+  }
+
+  test(
+    "Parser.min successfully parses at least minimum number of elements"
+  ) {
+    val parser = Parser.char('a').commit.min(2)
+    val input = "aa "
+
+    assertEquals(
+      parser.parse(input),
+      Resumable.success(NonEmptyChain('a', 'a'), input, 0, 2)
+    )
+  }
+
+  test(
+    "Parser.min fails if it cannot parse at least minimum number of elements"
+  ) {
+    val parser = Parser.char('a').commit.min(2)
+    val input = "a "
+
+    assertEquals(
+      parser.parse(input),
+      Resumable.committed(input, 0, 1)
+    )
+  }
+
+  test(
+    "Parser.max successfully parses no more than max number of elements"
+  ) {
+    val parser = Parser.char('a').commit.max(2)
+    val input = "aaaa "
+
+    assertEquals(
+      parser.parse(input),
+      Resumable.success(NonEmptyChain('a', 'a'), input, 0, 2)
+    )
   }
 }

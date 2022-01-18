@@ -2,6 +2,7 @@ package repast
 
 import cats.Semigroup
 import cats.data.Chain
+import cats.data.NonEmptyChain
 import cats.syntax.semigroup
 
 import scala.util.matching.Regex
@@ -56,6 +57,20 @@ enum Parser[A] {
 
   def as[B](b: B): Parser[B] =
     this.map(_ => b)
+
+  /** Repeat this parser one or more times */
+  def rep: Parser[NonEmptyChain[A]] =
+    Rep(this)
+
+  /** Repeat this parser at least count times. Count must be >= 1 */
+  def min(count: Int): Parser[NonEmptyChain[A]] =
+    Rep(this, min = count)
+
+  /** Repeat this parser at least once and no more than count times. Count must
+    * be >= 1
+    */
+  def max(count: Int): Parser[NonEmptyChain[A]] =
+    Rep(this, max = count)
 
   def map[B](f: A => B): Parser[B] =
     Map(this, f)
@@ -244,6 +259,38 @@ enum Parser[A] {
             }
         }
 
+      case r: Rep[a] =>
+        def loop(
+            accum: Success[NonEmptyChain[a]],
+            count: Int
+        ): Result[NonEmptyChain[a]] =
+          // Don't allow infinite loops on parsers that don't make progress
+          if accum.offset == accum.input.size then accum
+          else if count > r.min && count >= r.max then accum
+          else
+            r.source.parse(accum.input, accum.offset) match {
+              case Epsilon(i, s) =>
+                if count < r.min then Epsilon(i, s)
+                else accum
+              case Committed(i, s, o) =>
+                if count < r.min then Committed(i, s, o)
+                else accum
+              case Continue(a, i, s) => Continue(accum.result :+ a, i, s)
+              case Success(a, i, _, o) =>
+                loop(
+                  Success(accum.result :+ a, i, accum.start, o),
+                  count + 1
+                )
+            }
+
+        r.source.parse(input, offset) match {
+          case Epsilon(i, s)      => Epsilon(i, s)
+          case Committed(i, s, o) => Committed(i, s, o)
+          case Continue(a, i, s)  => Continue(NonEmptyChain.of(a), i, s)
+          case Success(a, i, s, o) =>
+            loop(Success(NonEmptyChain.of(a), i, s, o), 1)
+        }
+
       case StringIn(s) =>
         var found = false
         var length = -1
@@ -313,8 +360,10 @@ enum Parser[A] {
   case Exactly(expected: String) extends Parser[String]
   case Product[A, B](left: Parser[A], right: Parser[B]) extends Parser[(A, B)]
   case Map[A, B](source: Parser[A], f: A => B) extends Parser[B]
-  case OrElse(left: Parser[A], right: Parser[A]) extends Parser[A]
-  case OneOf(parsers: List[Parser[A]]) extends Parser[A]
+  case OrElse(left: Parser[A], right: Parser[A])
+  case OneOf(parsers: List[Parser[A]])
+  case Rep[A](source: Parser[A], min: Int = 1, max: Int = Int.MaxValue)
+      extends Parser[NonEmptyChain[A]]
   case StringIn(strings: Iterable[String]) extends Parser[String]
   case Void(parser: Parser[A]) extends Parser[Unit]
   case End extends Parser[String]

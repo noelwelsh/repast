@@ -1,6 +1,6 @@
 package repast
 
-import cats.data._
+import cats.data.*
 import cats.implicits.*
 import munit.FunSuite
 
