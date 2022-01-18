@@ -1,16 +1,19 @@
-val scala3Version = "3.0.2"
+val scala3Version = "3.1.0"
 
 ThisBuild / name := "repast"
 ThisBuild / scalaVersion := scala3Version
+ThisBuild / version := "0.1.0"
+ThisBuild / versionScheme := Some("early-semver")
+
 ThisBuild / useSuperShell := false
+
 ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.5.0"
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 
 libraryDependencies ++= Seq(
-  "org.typelevel" %% "cats-core" % "2.6.1",
+  "org.typelevel" %% "cats-core" % "2.7.0",
   "org.scalameta" %% "munit" % "0.7.29" % Test,
-  "com.novocode" % "junit-interface" % "0.11" % Test
 )
 
 lazy val build = taskKey[Unit]("Build everything")
