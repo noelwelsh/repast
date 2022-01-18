@@ -332,29 +332,41 @@ enum Parser[A] {
   case Character(char: Char) extends Parser[Char]
   case CharacterIn(chars: List[Char]) extends Parser[Char]
   case CharacterWhere(predicate: Char => Boolean) extends Parser[Char]
-  // Empty is true if an empty match should be considered a success instead of an epsilon failure
+  // Empty is true if an empty match should be considered a success instead of
+  // an epsilon failure.
+  //
   // Through is true if the element that terminates the match should be included
+  // in the result.
   case CharactersWhile(
       predicate: Char => Boolean,
       empty: Boolean,
       through: Boolean
   ) extends Parser[String]
-  // Empty is true if an empty match should be considered a success instead of an epsilon failure
+  // Empty is true if an empty match should be considered a success instead of
+  // an epsilon failure.
+  //
   // Through is true if the element that terminates the match should be included
+  // in the result.
   case CharactersUntilTerminator(
       terminators: Seq[String],
       empty: Boolean,
       through: Boolean
   ) extends Parser[String]
-  // Empty is true if an empty match should be considered a success instead of an epsilon failure
+  // Empty is true if an empty match should be considered a success instead of
+  // an epsilon failure.
+  //
   // Through is true if the element that terminates the match should be included
+  // in the result.
   case CharactersUntilTerminatorOrEnd(
       terminators: Seq[String],
       empty: Boolean,
       through: Boolean
   ) extends Parser[String]
-  // Empty is true if an empty match should be considered a success instead of an epsilon failure
+  // Empty is true if an empty match should be considered a success instead of
+  // an epsilon failure.
+  //
   // Through is true if the element that terminates the match should be included
+  // in the result.
   case CharactersUntilRegexOrEnd(regex: Regex, empty: Boolean, through: Boolean)
       extends Parser[String]
   case Exactly(expected: String) extends Parser[String]
