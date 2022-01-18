@@ -92,6 +92,13 @@ enum Parser[A] {
         else if input(offset) == ch then Success(ch, input, offset, offset + 1)
         else Epsilon(input, offset)
 
+      case CharacterIn(chars) =>
+        if offset == input.size then Epsilon(input, offset)
+        else
+          val ch = input(offset)
+          if chars.contains(ch) then Success(ch, input, offset, offset + 1)
+          else Epsilon(input, offset)
+
       case CharacterWhere(p) =>
         if offset == input.size then Epsilon(input, offset)
         else
@@ -276,6 +283,7 @@ enum Parser[A] {
     }
 
   case Character(char: Char) extends Parser[Char]
+  case CharacterIn(chars: List[Char]) extends Parser[Char]
   case CharacterWhere(predicate: Char => Boolean) extends Parser[Char]
   // Empty is true if an empty match should be considered a success instead of an epsilon failure
   // Through is true if the element that terminates the match should be included
@@ -316,6 +324,10 @@ object Parser {
   /** Parse the given character. */
   def char(char: Char): Parser[Char] =
     Parser.Character(char)
+
+  /** Parse one of the given characters. */
+  def charIn(char: Char, chars: Char*): Parser[Char] =
+    Parser.CharacterIn((char +: chars).toList)
 
   /** Parse a single character if the predicate is true. */
   def charWhere(predicate: Char => Boolean): Parser[Char] =

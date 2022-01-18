@@ -10,6 +10,12 @@ class ParserSuite extends FunSuite {
     assert(Parser.char('a').parse("b").isFailure)
   }
 
+  test("Parser.charIn") {
+    assertEquals(Parser.charIn('a').parseOrExn("a"), 'a')
+    assertEquals(Parser.charIn('a', 'b', 'c').parseOrExn("c"), 'c')
+    assert(Parser.charIn('a').parse("b").isFailure)
+  }
+
   test("Parser.charWhere") {
     assertEquals(Parser.charWhere(_.isDigit).parseOrExn("1"), '1')
     assert(Parser.charWhere(_.isDigit).parse("b").isFailure)

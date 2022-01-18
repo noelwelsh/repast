@@ -4,6 +4,7 @@ import cats.Semigroup
 import cats.data.NonEmptyChain
 import cats.implicits._
 import repast.continuation.*
+
 import scala.annotation.nowarn
 
 /** A parser that can be suspended
